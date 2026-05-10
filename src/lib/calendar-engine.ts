@@ -11,8 +11,10 @@ import {
   addDays,
   parseISO,
   getDay,
+  differenceInDays,
+  isBefore,
 } from "date-fns";
-import type { CalendarSystem } from "./types";
+import type { CalendarSystem, CalendarEvent } from "./types";
 
 export interface CalendarDay {
   date: Date;
@@ -166,6 +168,29 @@ export function buildWeekGrid(referenceDate: Date): CalendarDay[] {
     isWeekend: getDay(day) === 0 || getDay(day) === 6,
     displayDay: format(day, "d"),
   }));
+}
+
+export function eventOccursOnDate(event: CalendarEvent, targetDateStr: string): boolean {
+  if (event.recurrence === "none") return event.date === targetDateStr;
+
+  const start = parseISO(event.date);
+  const target = parseISO(targetDateStr);
+
+  if (isBefore(target, start)) return false;
+
+  const diff = differenceInDays(target, start);
+
+  switch (event.recurrence) {
+    case "daily":
+      return true;
+    case "weekly":
+      return diff % 7 === 0;
+    case "monthly":
+      return target.getDate() === start.getDate();
+    case "yearly":
+      return target.getDate() === start.getDate() && target.getMonth() === start.getMonth();
+  }
+  return false;
 }
 
 export const WEEK_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

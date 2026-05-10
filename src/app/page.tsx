@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCalendarStore } from "@/lib/store";
 import { Header } from "@/components/header";
@@ -11,12 +11,24 @@ import { DayView } from "@/components/views/day-view";
 import { EventDialog } from "@/components/event-dialog";
 
 export default function CalexaApp() {
-  const { view } = useCalendarStore();
+  const { view, navigateMonth } = useCalendarStore();
   const [mounted, setMounted] = useState(false);
+  const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 60) navigateMonth(diff > 0 ? 1 : -1);
+    touchStartX.current = null;
+  };
 
   if (!mounted) {
     return (
@@ -34,7 +46,11 @@ export default function CalexaApp() {
       <Header />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 flex flex-col overflow-hidden relative">
+        <main
+          className="flex-1 flex flex-col overflow-hidden relative"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={view}

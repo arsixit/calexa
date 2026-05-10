@@ -16,7 +16,7 @@ import {
   useDraggable,
 } from "@dnd-kit/core";
 import { useCalendarStore } from "@/lib/store";
-import { buildMonthGrid, getDayLabel, WEEK_DAYS } from "@/lib/calendar-engine";
+import { buildMonthGrid, getDayLabel, WEEK_DAYS, eventOccursOnDate } from "@/lib/calendar-engine";
 import { EVENT_COLORS, type CalendarEvent } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -137,7 +137,7 @@ export function MonthView() {
 
   const getEventsForDay = (dateStr: string) =>
     events
-      .filter((e) => e.date === dateStr)
+      .filter((e) => eventOccursOnDate(e, dateStr))
       .sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""));
 
   const handleDragStart = (e: DragStartEvent) => {

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { format, parseISO, isToday, isSameDay, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek, eachDayOfInterval, startOfMonth, endOfMonth, getDay } from "date-fns";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useCalendarStore } from "@/lib/store";
-import { formatMonthYear, getDayLabel, WEEK_DAYS } from "@/lib/calendar-engine";
+import { formatMonthYear, getDayLabel, WEEK_DAYS, eventOccursOnDate } from "@/lib/calendar-engine";
 import { EVENT_COLORS } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -65,7 +65,7 @@ function MiniCalendar() {
           const isSelected = isSameDay(day, selectedDate);
           const isThisMonth = isSameMonth(day, miniDate);
           const isTodayDate = isToday(day);
-          const hasEvents = events.some((e) => e.date === dateStr);
+          const hasEvents = events.some((e) => eventOccursOnDate(e, dateStr));
 
           return (
             <button
@@ -95,9 +95,19 @@ function UpcomingEvents() {
   const { events, openEditEventDialog } = useCalendarStore();
   const today = format(new Date(), "yyyy-MM-dd");
 
-  const upcoming = events
-    .filter((e) => e.date >= today)
-    .sort((a, b) => a.date.localeCompare(b.date))
+  const next30Days = Array.from({ length: 30 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    return format(d, "yyyy-MM-dd");
+  });
+
+  const upcoming = next30Days
+    .flatMap((dateStr) =>
+      events
+        .filter((e) => eventOccursOnDate(e, dateStr))
+        .map((e) => ({ ...e, date: dateStr }))
+    )
+    .filter((e, i, arr) => arr.findIndex((x) => x.id === e.id && x.date === e.date) === i)
     .slice(0, 5);
 
   if (upcoming.length === 0) {
@@ -139,7 +149,7 @@ export function Sidebar() {
   const { openNewEventDialog } = useCalendarStore();
 
   return (
-    <aside className="w-56 shrink-0 border-r border-border/50 flex flex-col bg-sidebar/50 overflow-y-auto scrollbar-hide">
+    <aside className="hidden md:flex w-56 shrink-0 border-r border-border/50 flex-col bg-sidebar/50 overflow-y-auto scrollbar-hide">
       <div className="p-3 pt-4">
         <Button
           size="sm"
