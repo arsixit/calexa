@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCalendarStore } from "@/lib/store";
 import { Header } from "@/components/header";
@@ -11,6 +12,22 @@ import { EventDialog } from "@/components/event-dialog";
 
 export default function CalexaApp() {
   const { view } = useCalendarStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="h-full flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl gradient-brand animate-pulse" />
+          <p className="text-sm text-muted-foreground font-medium">Loading Calexa...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col overflow-hidden bg-background">
