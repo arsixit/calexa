@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 const COLORS: EventColor[] = ["violet", "blue", "cyan", "green", "amber", "rose"];
+const PRESET_CATEGORIES = ["Work", "Personal", "Health", "Social", "Travel"];
 const RECURRENCE_OPTIONS: { value: RecurrenceRule; label: string }[] = [
   { value: "none", label: "Does not repeat" },
   { value: "daily", label: "Daily" },
@@ -184,6 +185,28 @@ export function EventDialog() {
               rows={2}
               className="flex-1 bg-transparent text-sm placeholder:text-muted-foreground/50 outline-none resize-none"
             />
+          </div>
+
+          {/* Category */}
+          <div className="flex items-start gap-2">
+            <Tag className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-1" />
+            <div className="flex flex-wrap gap-1.5">
+              {PRESET_CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setForm({ ...form, category: form.category === cat ? "" : cat })}
+                  className={cn(
+                    "px-2.5 py-0.5 rounded-full text-[11px] font-medium border transition-all",
+                    form.category === cat
+                      ? "bg-primary/15 text-primary border-primary/30"
+                      : "bg-muted/50 text-muted-foreground border-transparent hover:border-border hover:text-foreground"
+                  )}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Recurrence */}

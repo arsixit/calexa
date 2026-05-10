@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { motion } from "framer-motion";
 import { format, parseISO, isToday } from "date-fns";
 import { useCalendarStore } from "@/lib/store";
-import { buildWeekGrid, getDayLabel, HOURS, formatHour, WEEK_DAYS } from "@/lib/calendar-engine";
+import { buildWeekGrid, getDayLabel, HOURS, formatHour, WEEK_DAYS, eventOccursOnDate } from "@/lib/calendar-engine";
 import { EVENT_COLORS, type CalendarEvent } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -50,10 +50,10 @@ export function WeekView() {
   const weekDays = buildWeekGrid(parseISO(currentDate));
 
   const getEventsForDay = (dateStr: string) =>
-    events.filter((e) => e.date === dateStr && !e.allDay && e.startTime);
+    events.filter((e) => eventOccursOnDate(e, dateStr) && !e.allDay && e.startTime);
 
   const getAllDayEventsForDay = (dateStr: string) =>
-    events.filter((e) => e.date === dateStr && e.allDay);
+    events.filter((e) => eventOccursOnDate(e, dateStr) && e.allDay);
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">

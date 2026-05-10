@@ -67,23 +67,23 @@ export function Header() {
   const ThemeIcon = theme === "dark" ? Moon : theme === "light" ? Sun : Monitor;
 
   return (
-    <header className="h-16 flex items-center justify-between px-6 glass border-b border-border/50 shrink-0 z-10">
+    <header className="h-14 md:h-16 flex items-center justify-between px-3 md:px-6 glass border-b border-border/50 shrink-0 z-10">
       {/* Left: Logo + Navigation */}
-      <div className="flex items-center gap-6">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl gradient-brand flex items-center justify-center shadow-md shadow-primary/30">
-            <Calendar className="h-4 w-4 text-white" />
+      <div className="flex items-center gap-2 md:gap-6">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 md:w-8 md:h-8 rounded-xl gradient-brand flex items-center justify-center shadow-md shadow-primary/30">
+            <Calendar className="h-3.5 w-3.5 md:h-4 md:w-4 text-white" />
           </div>
-          <span className="font-bold text-lg gradient-brand-text tracking-tight">Calexa</span>
+          <span className="font-bold text-base md:text-lg gradient-brand-text tracking-tight hidden sm:block">Calexa</span>
         </div>
 
-        <div className="h-6 w-px bg-border" />
+        <div className="h-6 w-px bg-border hidden md:block" />
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 md:gap-1">
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-lg"
+            className="h-7 w-7 md:h-8 md:w-8 rounded-lg"
             onClick={() => navigateMonth(-1)}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -93,7 +93,7 @@ export function Header() {
             key={title}
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-sm font-semibold min-w-[160px] text-center"
+            className="text-xs md:text-sm font-semibold min-w-[100px] md:min-w-[160px] text-center"
           >
             {title}
           </motion.h1>
@@ -101,7 +101,7 @@ export function Header() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-lg"
+            className="h-7 w-7 md:h-8 md:w-8 rounded-lg"
             onClick={() => navigateMonth(1)}
           >
             <ChevronRight className="h-4 w-4" />
@@ -111,7 +111,7 @@ export function Header() {
         <Button
           variant="outline"
           size="sm"
-          className="h-7 rounded-lg text-xs font-medium"
+          className="h-6 md:h-7 rounded-lg text-[11px] md:text-xs font-medium hidden sm:flex"
           onClick={navigateToToday}
         >
           Today
@@ -119,28 +119,32 @@ export function Header() {
       </div>
 
       {/* Right: Controls */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 md:gap-2">
         {/* Command Palette Trigger */}
-        <CommandPalette />
+        <div className="hidden md:block">
+          <CommandPalette />
+        </div>
 
-        {/* Calendar System Switcher */}
-        <DropdownMenu>
-          <DropdownMenuTrigger className="inline-flex h-8 items-center gap-2 rounded-lg border border-border bg-background px-3 text-xs font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
-            <Calendar className="h-3.5 w-3.5" />
-            {CALENDAR_SYSTEM_LABELS[calendarSystem]}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-44">
-            {(Object.keys(CALENDAR_SYSTEM_LABELS) as CalendarSystem[]).map((sys) => (
-              <DropdownMenuItem
-                key={sys}
-                onClick={() => setCalendarSystem(sys)}
-                className={cn("text-xs", calendarSystem === sys && "text-primary font-semibold")}
-              >
-                {CALENDAR_SYSTEM_LABELS[sys]}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Calendar System Switcher — desktop only */}
+        <div className="hidden lg:block">
+          <DropdownMenu>
+            <DropdownMenuTrigger className="inline-flex h-8 items-center gap-2 rounded-lg border border-border bg-background px-3 text-xs font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
+              <Calendar className="h-3.5 w-3.5" />
+              {CALENDAR_SYSTEM_LABELS[calendarSystem]}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              {(Object.keys(CALENDAR_SYSTEM_LABELS) as CalendarSystem[]).map((sys) => (
+                <DropdownMenuItem
+                  key={sys}
+                  onClick={() => setCalendarSystem(sys)}
+                  className={cn("text-xs", calendarSystem === sys && "text-primary font-semibold")}
+                >
+                  {CALENDAR_SYSTEM_LABELS[sys]}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
         {/* View Switcher */}
         <div className="flex items-center gap-0.5 bg-muted rounded-lg p-0.5">
@@ -151,14 +155,14 @@ export function Header() {
               size="sm"
               onClick={() => setView(v)}
               className={cn(
-                "h-7 gap-1.5 rounded-md px-2.5 text-xs transition-all",
+                "h-6 md:h-7 gap-1 md:gap-1.5 rounded-md px-1.5 md:px-2.5 text-xs transition-all",
                 view === v
                   ? "bg-background shadow-sm text-foreground font-medium"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
               {VIEW_ICONS[v]}
-              {VIEW_LABELS[v]}
+              <span className="hidden md:inline">{VIEW_LABELS[v]}</span>
             </Button>
           ))}
         </div>
@@ -167,15 +171,17 @@ export function Header() {
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 rounded-lg"
+          className="h-7 w-7 md:h-8 md:w-8 rounded-lg hidden sm:flex"
           onClick={nextTheme}
           title="Toggle theme"
         >
           <ThemeIcon className="h-4 w-4" />
         </Button>
 
-        {/* Settings */}
-        <SettingsPanel />
+        {/* Settings — desktop only */}
+        <div className="hidden md:block">
+          <SettingsPanel />
+        </div>
 
         {/* User Menu */}
         <UserMenu />
@@ -183,11 +189,11 @@ export function Header() {
         {/* New Event */}
         <Button
           size="sm"
-          className="h-8 gap-1.5 rounded-lg gradient-brand text-white border-0 shadow-md shadow-primary/30 hover:opacity-90 hover:shadow-primary/40 transition-all"
+          className="h-7 md:h-8 gap-1 md:gap-1.5 rounded-lg gradient-brand text-white border-0 shadow-md shadow-primary/30 hover:opacity-90 hover:shadow-primary/40 transition-all px-2 md:px-3"
           onClick={() => openNewEventDialog()}
         >
           <Plus className="h-3.5 w-3.5" />
-          New Event
+          <span className="hidden sm:inline text-xs">New Event</span>
         </Button>
       </div>
     </header>

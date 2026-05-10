@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { format, parseISO, isToday } from "date-fns";
 import { useCalendarStore } from "@/lib/store";
-import { getDayLabel, HOURS, formatHour } from "@/lib/calendar-engine";
+import { getDayLabel, HOURS, formatHour, eventOccursOnDate } from "@/lib/calendar-engine";
 import { EVENT_COLORS, type CalendarEvent } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -52,8 +52,8 @@ export function DayView() {
   const date = parseISO(currentDate);
   const isTodayDate = isToday(date);
 
-  const dayEvents = events.filter((e) => e.date === currentDate && !e.allDay);
-  const allDayEvents = events.filter((e) => e.date === currentDate && e.allDay);
+  const dayEvents = events.filter((e) => eventOccursOnDate(e, currentDate) && !e.allDay);
+  const allDayEvents = events.filter((e) => eventOccursOnDate(e, currentDate) && e.allDay);
 
   const now = new Date();
   const currentHour = now.getHours() + now.getMinutes() / 60;
@@ -149,6 +149,11 @@ export function DayView() {
             {dayEvents.map((event) => (
               <EventBlock key={event.id} event={event} />
             ))}
+            {dayEvents.length === 0 && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+                <p className="text-xs text-muted-foreground/40 font-medium">No events — tap to add</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
