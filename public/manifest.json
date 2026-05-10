@@ -1,0 +1,33 @@
+{
+  "name": "Calexa — Professional Calendar",
+  "short_name": "Calexa",
+  "description": "A modern, professional calendar app with multi-calendar system support.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a12",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "New Event",
+      "short_name": "New",
+      "url": "/?action=new",
+      "description": "Create a new calendar event"
+    }
+  ]
+}

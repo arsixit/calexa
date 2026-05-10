@@ -25,6 +25,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { CommandPalette } from "@/components/command-palette";
+import { SettingsPanel } from "@/components/settings-panel";
 import { cn } from "@/lib/utils";
 
 const VIEW_ICONS: Record<CalendarView, React.ReactNode> = {
@@ -117,6 +119,9 @@ export function Header() {
 
       {/* Right: Controls */}
       <div className="flex items-center gap-2">
+        {/* Command Palette Trigger */}
+        <CommandPalette />
+
         {/* Calendar System Switcher */}
         <DropdownMenu>
           <DropdownMenuTrigger className="inline-flex h-8 items-center gap-2 rounded-lg border border-border bg-background px-3 text-xs font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
@@ -167,6 +172,9 @@ export function Header() {
         >
           <ThemeIcon className="h-4 w-4" />
         </Button>
+
+        {/* Settings */}
+        <SettingsPanel />
 
         {/* New Event */}
         <Button
