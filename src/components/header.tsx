@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { CommandPalette } from "@/components/command-palette";
 import { SettingsPanel } from "@/components/settings-panel";
+import { UserMenu } from "@/components/user-menu";
 import { cn } from "@/lib/utils";
 
 const VIEW_ICONS: Record<CalendarView, React.ReactNode> = {
@@ -175,6 +176,9 @@ export function Header() {
 
         {/* Settings */}
         <SettingsPanel />
+
+        {/* User Menu */}
+        <UserMenu />
 
         {/* New Event */}
         <Button

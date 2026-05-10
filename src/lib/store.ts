@@ -1,9 +1,25 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { format, addMonths, subMonths } from "date-fns";
-import type { CalendarStore, CalendarEvent, CalendarView, CalendarSystem, RecurrenceRule, EventColor } from "./types";
+import type { CalendarStore, CalendarEvent, CalendarView, CalendarSystem } from "./types";
 
 const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+
+// Lazily imported so server bundle doesn't break
+async function getDb() {
+  return import("./supabase/events-db");
+}
+
+async function getCurrentUserId(): Promise<string | null> {
+  try {
+    const { createClient } = await import("./supabase/client");
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    return user?.id ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export const useCalendarStore = create<CalendarStore>()(
   persist(
@@ -16,29 +32,47 @@ export const useCalendarStore = create<CalendarStore>()(
       editingEvent: null,
       isEventDialogOpen: false,
 
-      addEvent: (eventData) => {
+      addEvent: async (eventData) => {
         const event: CalendarEvent = {
           ...eventData,
           id: generateId(),
           createdAt: new Date().toISOString(),
         };
         set((state) => ({ events: [...state.events, event] }));
+
+        const userId = await getCurrentUserId();
+        if (userId) {
+          const db = await getDb();
+          await db.upsertEvent(event, userId).catch(console.error);
+        }
       },
 
-      updateEvent: (id, updates) => {
+      updateEvent: async (id, updates) => {
         set((state) => ({
           events: state.events.map((e) => (e.id === id ? { ...e, ...updates } : e)),
         }));
+
+        const userId = await getCurrentUserId();
+        if (userId) {
+          const updated = get().events.find((e) => e.id === id);
+          if (updated) {
+            const db = await getDb();
+            await db.upsertEvent(updated, userId).catch(console.error);
+          }
+        }
       },
 
-      deleteEvent: (id) => {
-        set((state) => ({
-          events: state.events.filter((e) => e.id !== id),
-        }));
+      deleteEvent: async (id) => {
+        set((state) => ({ events: state.events.filter((e) => e.id !== id) }));
+
+        const userId = await getCurrentUserId();
+        if (userId) {
+          const db = await getDb();
+          await db.removeEvent(id).catch(console.error);
+        }
       },
 
       setView: (view) => set({ view }),
-
       setCalendarSystem: (calendarSystem) => set({ calendarSystem }),
 
       navigateMonth: (direction) => {
@@ -48,12 +82,8 @@ export const useCalendarStore = create<CalendarStore>()(
         set({ currentDate: format(next, "yyyy-MM-dd") });
       },
 
-      navigateToToday: () => {
-        set({ currentDate: format(new Date(), "yyyy-MM-dd") });
-      },
-
+      navigateToToday: () => set({ currentDate: format(new Date(), "yyyy-MM-dd") }),
       setCurrentDate: (date) => set({ currentDate: date }),
-
       setSelectedDate: (date) => set({ selectedDate: date }),
 
       openNewEventDialog: (date) => {
@@ -64,13 +94,9 @@ export const useCalendarStore = create<CalendarStore>()(
         });
       },
 
-      openEditEventDialog: (event) => {
-        set({ editingEvent: event, isEventDialogOpen: true });
-      },
-
-      closeEventDialog: () => {
-        set({ editingEvent: null, isEventDialogOpen: false });
-      },
+      openEditEventDialog: (event) => set({ editingEvent: event, isEventDialogOpen: true }),
+      closeEventDialog: () => set({ editingEvent: null, isEventDialogOpen: false }),
+      setEvents: (events) => set({ events }),
     }),
     {
       name: "calexa-storage",

@@ -42,6 +42,7 @@ export interface CalendarStore {
   openNewEventDialog: (date?: string) => void;
   openEditEventDialog: (event: CalendarEvent) => void;
   closeEventDialog: () => void;
+  setEvents: (events: CalendarEvent[]) => void;
 }
 
 export const EVENT_COLORS: Record<EventColor, { bg: string; text: string; border: string; dot: string }> = {
