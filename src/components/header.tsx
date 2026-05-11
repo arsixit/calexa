@@ -13,6 +13,8 @@ import {
   Columns3,
   AlignJustify,
   Plus,
+  MoreHorizontal,
+  CalendarDays,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { useCalendarStore } from "@/lib/store";
@@ -167,7 +169,7 @@ export function Header() {
           ))}
         </div>
 
-        {/* Theme Toggle */}
+        {/* Theme Toggle — desktop */}
         <Button
           variant="ghost"
           size="icon"
@@ -182,6 +184,33 @@ export function Header() {
         <div className="hidden md:block">
           <SettingsPanel />
         </div>
+
+        {/* Mobile overflow menu */}
+        <DropdownMenu>
+          <DropdownMenuTrigger className="inline-flex h-7 w-7 items-center justify-center rounded-lg hover:bg-accent transition-colors flex sm:hidden">
+            <MoreHorizontal className="h-4 w-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuItem onClick={navigateToToday} className="text-xs gap-2">
+              <CalendarDays className="h-3.5 w-3.5" />
+              Go to Today
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={nextTheme} className="text-xs gap-2">
+              <ThemeIcon className="h-3.5 w-3.5" />
+              {theme === "light" ? "Switch to Dark" : theme === "dark" ? "Switch to System" : "Switch to Light"}
+            </DropdownMenuItem>
+            {(Object.keys(CALENDAR_SYSTEM_LABELS) as CalendarSystem[]).map((sys) => (
+              <DropdownMenuItem
+                key={sys}
+                onClick={() => setCalendarSystem(sys)}
+                className={cn("text-xs gap-2", calendarSystem === sys && "text-primary font-semibold")}
+              >
+                <Calendar className="h-3.5 w-3.5" />
+                {CALENDAR_SYSTEM_LABELS[sys]}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* User Menu */}
         <UserMenu />
