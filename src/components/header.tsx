@@ -148,8 +148,8 @@ export function Header() {
           </DropdownMenu>
         </div>
 
-        {/* View Switcher */}
-        <div className="flex items-center gap-0.5 bg-muted rounded-lg p-0.5">
+        {/* View Switcher — desktop only */}
+        <div className="hidden sm:flex items-center gap-0.5 bg-muted rounded-lg p-0.5">
           {(["month", "week", "day"] as CalendarView[]).map((v) => (
             <Button
               key={v}
@@ -199,6 +199,16 @@ export function Header() {
               <ThemeIcon className="h-3.5 w-3.5" />
               {theme === "light" ? "Switch to Dark" : theme === "dark" ? "Switch to System" : "Switch to Light"}
             </DropdownMenuItem>
+            {(["month", "week", "day"] as CalendarView[]).map((v) => (
+              <DropdownMenuItem
+                key={v}
+                onClick={() => setView(v)}
+                className={cn("text-xs gap-2", view === v && "text-primary font-semibold")}
+              >
+                {VIEW_ICONS[v]}
+                {VIEW_LABELS[v]} view
+              </DropdownMenuItem>
+            ))}
             {(Object.keys(CALENDAR_SYSTEM_LABELS) as CalendarSystem[]).map((sys) => (
               <DropdownMenuItem
                 key={sys}
