@@ -4,8 +4,9 @@ import { createContext, useContext, useEffect, useState, useCallback, useRef } f
 import type { User } from "@supabase/supabase-js";
 import type { CalendarEvent } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
-import { signInWithGoogle as initiateSignIn, signOut as initiateSignOut } from "@/lib/supabase/auth";
+import { signInWithGoogle as initiateSignIn, signOut as initiateSignOut, getGoogleAccessToken } from "@/lib/supabase/auth";
 import { fetchEvents, upsertEvents } from "@/lib/supabase/events-db";
+import { fetchGoogleCalendarEvents } from "@/lib/google-calendar";
 import { useNotification } from "@/components/providers/notification-provider";
 import { useCalendarStore } from "@/lib/store";
 
@@ -18,6 +19,7 @@ interface AuthContextValue {
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   syncNow: () => Promise<void>;
+  syncGoogleCalendar: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue>({
@@ -29,6 +31,7 @@ const AuthContext = createContext<AuthContextValue>({
   signInWithGoogle: async () => {},
   signOut: async () => {},
   syncNow: async () => {},
+  syncGoogleCalendar: async () => {},
 });
 
 export function useAuth() {
@@ -153,6 +156,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const syncGoogleCalendar = async () => {
+    if (!user) {
+      notify("Sign in first to sync Google Calendar.", { variant: "info" });
+      return;
+    }
+
+    setSyncError(null);
+    setSyncing(true);
+
+    try {
+      const accessToken = await getGoogleAccessToken();
+      if (!accessToken) {
+        throw new Error("Google Calendar access token is unavailable.");
+      }
+
+      const googleEvents = await fetchGoogleCalendarEvents(accessToken);
+      if (googleEvents.length === 0) {
+        notify("No upcoming Google Calendar events found.", { variant: "info" });
+        return;
+      }
+
+      const localEvents = useCalendarStore.getState().events;
+      const mergedEvents = mergeEvents(localEvents, googleEvents);
+      setEvents(mergedEvents);
+      await upsertEvents(mergedEvents, user.id);
+      setLastSyncedAt(new Date().toISOString());
+      notify(`Synced ${googleEvents.length} Google Calendar event${googleEvents.length !== 1 ? "s" : ""}.`, { variant: "success" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error("Google sync error:", err);
+      setSyncError(message);
+      notify(`Google Calendar sync failed: ${message}`, { variant: "error" });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const syncNow = async () => {
     if (!user) return;
     const success = await syncOnLogin(user.id);
@@ -171,6 +211,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signInWithGoogle,
       signOut,
       syncNow,
+      syncGoogleCalendar,
     }}>
       {children}
     </AuthContext.Provider>

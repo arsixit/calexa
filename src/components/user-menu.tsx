@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { LogIn, LogOut, User, Cloud, Loader2, RefreshCcw } from "lucide-react";
+import { LogIn, LogOut, Cloud, Loader2, RefreshCcw, Calendar } from "lucide-react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useNotification } from "@/components/providers/notification-provider";
 import {
@@ -14,7 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export function UserMenu() {
-  const { user, loading, signInWithGoogle, signOut, syncing, syncError, lastSyncedAt, syncNow } = useAuth();
+  const { user, loading, signInWithGoogle, signOut, syncing, syncError, lastSyncedAt, syncNow, syncGoogleCalendar } = useAuth();
   const { notify } = useNotification();
   const [signingIn, setSigningIn] = useState(false);
 
@@ -112,6 +112,14 @@ export function UserMenu() {
         >
           <RefreshCcw className="h-3.5 w-3.5" />
           Sync now
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={syncGoogleCalendar}
+          disabled={syncing}
+          className="text-xs gap-2 cursor-pointer"
+        >
+          <Calendar className="h-3.5 w-3.5" />
+          Sync Google Calendar
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={signOut}

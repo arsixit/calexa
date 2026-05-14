@@ -14,6 +14,7 @@ A modern, feature-rich calendar application built with Next.js 15, TypeScript, a
 - **Export / Import** — Full `.ics` support — compatible with Google Calendar, Apple Calendar, and Outlook
 - **Supabase Google OAuth** — Sign in with Google and keep events synced across devices
 - **Cloud Sync** — Per-user persistent sync between local storage and Supabase
+- **Google Calendar Sync** — Experimental integration with Google Calendar events
 - **PWA Ready** — Installable on mobile and desktop
 - **localStorage Persistence** — Events saved locally, no account required
 
@@ -90,7 +91,7 @@ src/
 - [x] PWA support
 - [x] Supabase Auth (Google OAuth)
 - [x] Cloud sync across devices
-- [ ] Google Calendar API sync
+- [ ] Google Calendar API sync (experimental)
 - [ ] Team event sharing
 
 ## License

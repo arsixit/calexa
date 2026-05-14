@@ -7,9 +7,17 @@ export async function signInWithGoogle() {
     provider: "google",
     options: {
       redirectTo: `${window.location.origin}/auth/callback`,
+      scopes: "https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.events.readonly",
     },
   });
   if (error) throw error;
+}
+
+export async function getGoogleAccessToken(): Promise<string | null> {
+  const supabase = createClient();
+  const { data: { session }, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  return session?.provider_token ?? null;
 }
 
 export async function signOut() {
