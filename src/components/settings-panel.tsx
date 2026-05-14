@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { Settings, Download, Upload, Trash2, Calendar, Info } from "lucide-react";
+import { Settings, Download, Upload } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,25 +11,56 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useCalendarStore } from "@/lib/store";
 import { exportToICS, parseICS } from "@/lib/ics";
+import { useNotification } from "@/components/providers/notification-provider";
+import type { CalendarEvent } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 
 export function SettingsPanel() {
   const { events, addEvent } = useCalendarStore();
   const importRef = useRef<HTMLInputElement>(null);
+  const { notify } = useNotification();
+
+  const createEventKey = (event: Omit<CalendarEvent, "id" | "createdAt">) => {
+    return [
+      event.title.trim().toLowerCase(),
+      event.date,
+      event.allDay ? "all-day" : `${event.startTime ?? ""}-${event.endTime ?? ""}`,
+      event.recurrence,
+      event.category?.trim().toLowerCase() ?? "",
+    ].join("|");
+  };
 
   const handleExport = () => {
     exportToICS(events);
+    notify("Exported calendar to .ics", { variant: "success" });
   };
 
-  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      const content = ev.target?.result as string;
-      const parsed = parseICS(content);
-      parsed.forEach((event) => addEvent(event));
-      alert(`Imported ${parsed.length} event${parsed.length !== 1 ? "s" : ""} successfully!`);
+    reader.onload = async (ev) => {
+      try {
+        const content = ev.target?.result as string;
+        const parsed = parseICS(content);
+        const existingKeys = new Set(events.map((event) => createEventKey(event)));
+        const uniqueEvents = parsed.filter((event) => {
+          const key = createEventKey(event);
+          if (existingKeys.has(key)) return false;
+          existingKeys.add(key);
+          return true;
+        });
+
+        await Promise.all(uniqueEvents.map((event) => addEvent(event)));
+        if (uniqueEvents.length > 0) {
+          notify(`Imported ${uniqueEvents.length} new event${uniqueEvents.length !== 1 ? "s" : ""} successfully!`, { variant: "success" });
+        } else {
+          notify("No new events were imported. Duplicates were skipped.", { variant: "info" });
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        notify(`Import failed: ${message}`, { variant: "error" });
+      }
     };
     reader.readAsText(file);
     e.target.value = "";

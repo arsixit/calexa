@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { LogIn, LogOut, User, Cloud, CloudOff, Loader2 } from "lucide-react";
+import { LogIn, LogOut, User, Cloud, Loader2, RefreshCcw } from "lucide-react";
 import { useAuth } from "@/components/providers/auth-provider";
+import { useNotification } from "@/components/providers/notification-provider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,14 +14,17 @@ import {
 import { cn } from "@/lib/utils";
 
 export function UserMenu() {
-  const { user, loading, signInWithGoogle, signOut } = useAuth();
+  const { user, loading, signInWithGoogle, signOut, syncing, syncError, lastSyncedAt, syncNow } = useAuth();
+  const { notify } = useNotification();
   const [signingIn, setSigningIn] = useState(false);
 
   const handleSignIn = async () => {
     setSigningIn(true);
     try {
       await signInWithGoogle();
-    } catch {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to sign in.";
+      notify(`Sign in failed: ${message}`, { variant: "error" });
       setSigningIn(false);
     }
   };
@@ -83,12 +87,32 @@ export function UserMenu() {
             {user.user_metadata?.full_name ?? "User"}
           </p>
           <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
-          <div className="flex items-center gap-1 mt-1">
-            <Cloud className="h-2.5 w-2.5 text-emerald-500" />
-            <span className="text-[10px] text-emerald-600 dark:text-emerald-400">Synced to cloud</span>
+          <div className="flex flex-col gap-1 mt-1">
+            <div className="flex items-center gap-1">
+              <Cloud className="h-2.5 w-2.5 text-emerald-500" />
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400">
+                {syncing ? "Syncing..." : syncError ? "Sync error" : "Synced to cloud"}
+              </span>
+            </div>
+            {lastSyncedAt ? (
+              <p className="text-[10px] text-muted-foreground truncate">
+                Last synced {new Date(lastSyncedAt).toLocaleString()}
+              </p>
+            ) : null}
+            {syncError ? (
+              <p className="text-[10px] text-destructive truncate">{syncError}</p>
+            ) : null}
           </div>
         </div>
         <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={syncNow}
+          disabled={syncing}
+          className="text-xs gap-2 cursor-pointer"
+        >
+          <RefreshCcw className="h-3.5 w-3.5" />
+          Sync now
+        </DropdownMenuItem>
         <DropdownMenuItem
           onClick={signOut}
           className="text-xs gap-2 cursor-pointer text-destructive focus:text-destructive"

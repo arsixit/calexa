@@ -18,6 +18,7 @@ export interface CalendarEvent {
   category?: string;
   recurrence: RecurrenceRule;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface CalendarStore {
@@ -30,7 +31,7 @@ export interface CalendarStore {
   isEventDialogOpen: boolean;
 
   // actions
-  addEvent: (event: Omit<CalendarEvent, "id" | "createdAt">) => void;
+  addEvent: (event: Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">) => void;
   updateEvent: (id: string, updates: Partial<CalendarEvent>) => void;
   deleteEvent: (id: string) => void;
   setView: (view: CalendarView) => void;
@@ -43,6 +44,8 @@ export interface CalendarStore {
   openEditEventDialog: (event: CalendarEvent) => void;
   closeEventDialog: () => void;
   setEvents: (events: CalendarEvent[]) => void;
+  setStorageUser: (userId: string | null) => void;
+  loadUserState: (userId: string | null) => void;
 }
 
 export const EVENT_COLORS: Record<EventColor, { bg: string; text: string; border: string; dot: string }> = {

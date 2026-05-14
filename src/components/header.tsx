@@ -15,12 +15,15 @@ import {
   Plus,
   MoreHorizontal,
   CalendarDays,
+  RefreshCcw,
+  Loader2,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { useCalendarStore } from "@/lib/store";
 import { formatMonthYear } from "@/lib/calendar-engine";
 import { CALENDAR_SYSTEM_LABELS, type CalendarSystem, type CalendarView } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/components/providers/auth-provider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,6 +59,7 @@ export function Header() {
     setCalendarSystem,
     openNewEventDialog,
   } = useCalendarStore();
+  const { user, syncing, syncError, lastSyncedAt, syncNow } = useAuth();
 
   const date = parseISO(currentDate);
   const title = formatMonthYear(date, calendarSystem);
@@ -180,10 +184,36 @@ export function Header() {
           <ThemeIcon className="h-4 w-4" />
         </Button>
 
+        {user ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 md:h-8 md:w-8 rounded-lg hidden sm:flex"
+            onClick={syncNow}
+            disabled={syncing}
+            title={syncing ? "Syncing calendar..." : "Sync calendar"}
+          >
+            {syncing ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <RefreshCcw className="h-4 w-4" />}
+          </Button>
+        ) : null}
+
         {/* Settings — desktop only */}
         <div className="hidden md:block">
           <SettingsPanel />
         </div>
+
+        {user ? (
+          <div className="hidden sm:flex flex-col items-end text-right text-[10px] text-muted-foreground mr-2">
+            <span className={syncError ? "text-destructive" : syncing ? "text-primary" : "text-muted-foreground"}>
+              {syncError ? "Sync issue" : syncing ? "Syncing..." : "Synced"}
+            </span>
+            {lastSyncedAt ? (
+              <span className="text-muted-foreground/80">
+                {new Date(lastSyncedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
 
         {/* Mobile overflow menu */}
         <DropdownMenu>
@@ -199,6 +229,15 @@ export function Header() {
               <ThemeIcon className="h-3.5 w-3.5" />
               {theme === "light" ? "Switch to Dark" : theme === "dark" ? "Switch to System" : "Switch to Light"}
             </DropdownMenuItem>
+            {user ? (
+              <DropdownMenuItem
+                onClick={() => !syncing && syncNow()}
+                className={cn("text-xs gap-2", syncing && "opacity-50 cursor-not-allowed")}
+              >
+                <RefreshCcw className="h-3.5 w-3.5" />
+                {syncing ? "Syncing..." : "Sync now"}
+              </DropdownMenuItem>
+            ) : null}
             {(["month", "week", "day"] as CalendarView[]).map((v) => (
               <DropdownMenuItem
                 key={v}

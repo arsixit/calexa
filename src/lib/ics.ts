@@ -98,6 +98,7 @@ export function parseICS(content: string): Omit<CalendarEvent, "id" | "createdAt
 
     if (line === "END:VEVENT" && inEvent) {
       if (current.title && current.date) {
+        current.updatedAt = current.updatedAt || new Date().toISOString();
         events.push(current as Omit<CalendarEvent, "id" | "createdAt">);
       }
       inEvent = false;

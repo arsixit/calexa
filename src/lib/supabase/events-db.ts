@@ -15,6 +15,7 @@ function toDbRow(event: CalendarEvent, userId: string) {
     category: event.category ?? null,
     recurrence: event.recurrence,
     created_at: event.createdAt,
+    updated_at: event.updatedAt,
   };
 }
 
@@ -31,17 +32,29 @@ function fromDbRow(row: Record<string, unknown>): CalendarEvent {
     category: (row.category as string) ?? undefined,
     recurrence: row.recurrence as CalendarEvent["recurrence"],
     createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
   };
 }
 
-export async function fetchEvents(): Promise<CalendarEvent[]> {
+export async function fetchEvents(userId: string): Promise<CalendarEvent[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("events")
     .select("*")
+    .eq("user_id", userId)
     .order("date", { ascending: true });
   if (error) throw error;
   return (data ?? []).map(fromDbRow);
+}
+
+export async function upsertEvents(events: CalendarEvent[], userId: string): Promise<void> {
+  if (events.length === 0) return;
+  const supabase = createClient();
+  const rows = events.map((event) => toDbRow(event, userId));
+  const { error } = await supabase
+    .from("events")
+    .upsert(rows, { onConflict: "id" });
+  if (error) throw error;
 }
 
 export async function upsertEvent(event: CalendarEvent, userId: string): Promise<void> {

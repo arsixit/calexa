@@ -14,7 +14,8 @@ create table if not exists public.events (
   color text default 'violet',
   category text,
   recurrence text default 'none',
-  created_at timestamptz default now()
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
 );
 
 -- Enable Row Level Security

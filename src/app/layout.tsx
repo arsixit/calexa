@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { NotificationProvider } from "@/components/providers/notification-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,9 +47,11 @@ export default function RootLayout({
           disableTransitionOnChange={false}
         >
           <TooltipProvider>
-            <AuthProvider>
-              {children}
-            </AuthProvider>
+            <NotificationProvider>
+              <AuthProvider>
+                {children}
+              </AuthProvider>
+            </NotificationProvider>
           </TooltipProvider>
         </ThemeProvider>
       </body>
