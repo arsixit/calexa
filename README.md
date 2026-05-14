@@ -12,6 +12,8 @@ A modern, feature-rich calendar application built with Next.js 15, TypeScript, a
 - **Drag & Drop** — Move events between days directly in the month view
 - **Event Management** — Create, edit, delete with color categories and recurring events
 - **Export / Import** — Full `.ics` support — compatible with Google Calendar, Apple Calendar, and Outlook
+- **Supabase Google OAuth** — Sign in with Google and keep events synced across devices
+- **Cloud Sync** — Per-user persistent sync between local storage and Supabase
 - **PWA Ready** — Installable on mobile and desktop
 - **localStorage Persistence** — Events saved locally, no account required
 
@@ -86,8 +88,8 @@ src/
 - [x] Drag & Drop events
 - [x] Export / Import .ics
 - [x] PWA support
-- [ ] Supabase Auth (Google OAuth)
-- [ ] Cloud sync across devices
+- [x] Supabase Auth (Google OAuth)
+- [x] Cloud sync across devices
 - [ ] Google Calendar API sync
 - [ ] Team event sharing
 
